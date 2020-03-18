@@ -1,2 +1,18 @@
 epochs: 100
-
+batch-size: 1
+gpu: 0
+lmdb-train: 'data/shapenet/train.lmdb'
+lmdb-valid: 'data/shapenet/valid.lmdb'
+num-input-points: 3000
+num-gt-points: 16384
+log-dir: 'log/pcn-emd'
+model-type: 'pcn-emd'
+lr-decay-steps: 50000
+lr-decay-rate: 0.7
+lr-clip: 0.000001
+max-steps: 300000
+steps-per-print: 100
+steps-per-eval: 1000
+steps-per-vis: 3000
+steps-per-save: 100000
+vis-frequency: 5
