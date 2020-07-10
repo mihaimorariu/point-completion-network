@@ -57,3 +57,5 @@ def plot_side_by_side(partial, complete):
     plot_cloud_points(ax, complete)
     ax.set_title('Complete cloud')
     plt.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0)
+    plt.savefig('/home/mmorariu/image.png')
+    plt.show()

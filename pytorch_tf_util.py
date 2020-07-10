@@ -4,41 +4,6 @@ import torch
 from pc_distance import tf_nndistance, tf_approxmatch
 
 
-class MLP(torch.nn.Module):
-    def __init__(self, in_channels, layer_dims):
-        super(MLP, self).__init__()
-        self.layer_dims = layer_dims
-        self.seqs = []
-
-        for _, out_channels in enumerate(layer_dims):
-            self.seqs.append(torch.nn.Sequential(
-                torch.nn.Linear(in_channels, out_channels),
-                torch.nn.ReLU()
-            ))
-            in_channels = out_channels
-
-    def __call__(self, features):
-        output = features
-        for seq in self.seqs:
-            output = seq(output)
-        return output
-
-
-class MLPConv(torch.nn.Module):
-    def __init__(self, in_channels, layer_dims):
-        super(MLPConv, self).__init__()
-        self.layer_dims = layer_dims
-        self.conv1s = []
-
-        for _, out_channels in enumerate(layer_dims):
-            self.conv1s.append(torch.nn.Conv1d(in_channels, out_channels, kernel_size=1))
-            in_channels = out_channels
-
-    def __call__(self, input):
-        output = input
-        for conv1 in self.conv1s:
-            output = conv1(output)
-        return output
 
 
 def point_maxpool(input, npts, keepdim=False):
