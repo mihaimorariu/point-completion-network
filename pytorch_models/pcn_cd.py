@@ -26,6 +26,8 @@ class Folding(torch.nn.Module):
 
     def __call__(self, features, coarse):
         grid_feat = self.meshgrid.repeat(features.shape[0], self.num_coarse, 1)
+        grid_feat = grid_feat.to(features.device)
+
         point_feat = torch.unsqueeze(coarse, 2)
         point_feat = point_feat.repeat(1, 1, self.grid_size ** 2, 1)
         point_feat = torch.reshape(point_feat, [-1, self.num_fine, 3])
