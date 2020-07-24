@@ -7,17 +7,16 @@ from pc_distance import tf_nndistance, tf_approxmatch
 
 
 def point_maxpool(input, npts, keepdim=False):
-    split_size = [input.shape[2] // npt for npt in npts]
     output = [f.max(dim=2, keepdims=keepdim).values
-              for f in torch.split(input, split_size, dim=2)]
+              for f in torch.split(input, npts, dim=2)]
     output = torch.cat(output, dim=0)
     return output
 
 
 def point_unpool(input, npts):
     input = torch.split(input, input.shape[0], dim=0)
-    output = [f.repeat(1, npts[i], 1) for i, f in enumerate(input)]
-    output = torch.cat(output, dim=1)
+    output = [f.repeat(1, 1, npts[i]) for i, f in enumerate(input)]
+    output = torch.cat(output, dim=0)
     return output
 
 
