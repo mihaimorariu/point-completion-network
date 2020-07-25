@@ -1,5 +1,6 @@
-from pytorch_tf_util import *
-import torch.nn.functional as F
+import torch
+from torch.nn.functional import relu
+from common.helper import point_unpool, point_maxpool
 
 
 class Folding(torch.nn.Module):
@@ -18,14 +19,14 @@ class Folding(torch.nn.Module):
         x = torch.linspace(-0.05, 0.05, self.grid_size)
         y = torch.linspace(-0.05, 0.05, self.grid_size)
 
-        self.meshgrid = torch.meshgrid(x, y)
-        self.meshgrid = torch.stack(self.meshgrid, axis=2)
-        self.meshgrid = self.meshgrid.transpose(1, 0)
-        self.meshgrid = torch.reshape(self.meshgrid, [-1, 2])
-        self.meshgrid = torch.unsqueeze(self.meshgrid, 0)
+        self.grid = torch.meshgrid(x, y)
+        self.grid = torch.stack(self.grid, axis=2)
+        self.grid = self.grid.transpose(1, 0)
+        self.grid = torch.reshape(self.grid, [-1, 2])
+        self.grid = torch.unsqueeze(self.grid, 0)
 
     def __call__(self, features, coarse):
-        grid_feat = self.meshgrid.repeat(features.shape[0], self.num_coarse, 1)
+        grid_feat = self.grid.repeat(features.shape[0], self.num_coarse, 1)
         grid_feat = grid_feat.to(features.device)
 
         point_feat = torch.unsqueeze(coarse, 2)
@@ -48,7 +49,7 @@ class Folding(torch.nn.Module):
             if i == dims - 1:
                 fine = layer(fine)
             else:
-                fine = F.relu(layer(fine))
+                fine = relu(layer(fine))
 
         fine = fine.transpose(1, 2) + center
         return fine
@@ -64,15 +65,15 @@ class Encoder(torch.nn.Module):
             in_channels = out_channels
 
     def __call__(self, input):
-        output = input
+        outputs = input
         dims = len(self.layer_dims)
         for i in range(dims):
             layer = getattr(self, 'conv_' + str(i))
             if i == dims - 1:
-                output = layer(output)
+                outputs = layer(outputs)
             else:
-                output = F.relu(layer(output))
-        return output
+                outputs = relu(layer(outputs))
+        return outputs
 
 
 class Decoder(torch.nn.Module):
@@ -85,15 +86,15 @@ class Decoder(torch.nn.Module):
             in_channels = out_channels
 
     def __call__(self, input):
-        output = input
+        outputs = input
         dims = len(self.layer_dims)
         for i in range(dims):
             layer = getattr(self, 'fc_' + str(i))
             if i == dims - 1:
-                output = layer(output)
+                outputs = layer(outputs)
             else:
-                output = F.relu(layer(output))
-        return output
+                outputs = relu(layer(outputs))
+        return outputs
 
 
 class Model(torch.nn.Module):
@@ -115,9 +116,9 @@ class Model(torch.nn.Module):
         coarse, fine = self.decode(features)
         return coarse, fine
 
-    def encode(self, input):
-        num_points = [input.shape[2]]
-        features = self.encoder_0(input)
+    def encode(self, inputs):
+        num_points = [inputs.shape[2]]
+        features = self.encoder_0(inputs)
         features_global = point_maxpool(features, num_points, keepdim=True)
         features_global = point_unpool(features_global, num_points)
         features = torch.cat([features, features_global], dim=1)
