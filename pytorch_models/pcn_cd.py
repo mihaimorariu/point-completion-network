@@ -64,8 +64,8 @@ class Encoder(torch.nn.Module):
             setattr(self, 'conv_' + str(i), layer)
             in_channels = out_channels
 
-    def __call__(self, input):
-        outputs = input
+    def __call__(self, inputs):
+        outputs = inputs
         dims = len(self.layer_dims)
         for i in range(dims):
             layer = getattr(self, 'conv_' + str(i))
@@ -85,8 +85,8 @@ class Decoder(torch.nn.Module):
             setattr(self, 'fc_' + str(i), layer)
             in_channels = out_channels
 
-    def __call__(self, input):
-        outputs = input
+    def __call__(self, inputs):
+        outputs = inputs
         dims = len(self.layer_dims)
         for i in range(dims):
             layer = getattr(self, 'fc_' + str(i))
@@ -111,8 +111,8 @@ class Model(torch.nn.Module):
         self.folding = Folding(in_channels=1029, layer_dims=[512, 512, 3], grid_size=self.grid_size,
                                num_coarse=self.num_coarse, num_fine=self.num_fine)
 
-    def __call__(self, input):
-        features = self.encode(input)
+    def __call__(self, inputs):
+        features = self.encode(inputs)
         coarse, fine = self.decode(features)
         return coarse, fine
 

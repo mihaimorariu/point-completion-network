@@ -6,17 +6,17 @@ from common.helper import *
 
 
 def parse_arguments():
-    model_choices = ['pcn_cd', 'pcn_emd', 'folding', 'fc']
+    model_types = ['pcn_cd', 'pcn_emd', 'folding', 'fc']
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--device',
                         type=int, default=0, help='device id (-1 for cpu, non-zero value for gpu)')
     parser.add_argument('-i', '--input-file',
-                        type=str, default='demo_data/lamp.pcd', help='input (partial) point cloud file')
+                        type=str, default='demo_data/chair.pcd', help='input (partial) point cloud file')
     parser.add_argument('-m', '--model-type',
-                        type=str, default='pcn_cd', choices=model_choices, help='model type')
+                        type=str, default='pcn_emd', choices=model_types, help='model type')
     parser.add_argument('-c', '--checkpoint',
-                        type=str, default='data/trained_models/pcn_cd', help='checkpoint file')
+                        type=str, default='data/trained_models/pcn_emd', help='checkpoint file')
     parser.add_argument('-p', '--num-gt-points',
                         type=int, default=16384, help='number of ground-truth points')
     parser.add_argument('-o', '--onnx-model-file',
@@ -36,6 +36,10 @@ if __name__ == '__main__':
 
     if args.model_type == 'pcn_cd':
         from pytorch_models.pcn_cd import Model
+    elif args.model_type == 'pcn_emd':
+        from pytorch_models.pcn_emd import Model
+
+    print('Model type:', args.model_type)
 
     model = Model()
     if args.device >= 0:
